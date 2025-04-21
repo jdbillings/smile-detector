@@ -1,4 +1,6 @@
 import os
+from smile_detector.app_config import config, logger
+
 
 class FSLock:
     """
@@ -15,8 +17,10 @@ class FSLock:
         try:
             with open(self.lock_file, 'x') as f:
                 f.write('LOCK')
+            logger.info(f"PID={config.pid}; Lock acquired: {self.lock_file}")
             return True
         except FileExistsError:
+            logger.debug(f"PID={config.pid}; Lock file already exists: {self.lock_file}")
             return False
 
     def release(self):
@@ -25,6 +29,8 @@ class FSLock:
         """
         try:
             os.remove(self.lock_file)
+            logger.info(f"PID={config.pid}; Lock released: {self.lock_file}")
             return True
         except FileNotFoundError:
+            logger.error(f"PID={config.pid}; Lock file not found for release: {self.lock_file}")
             return False

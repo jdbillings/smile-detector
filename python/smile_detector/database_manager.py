@@ -22,10 +22,8 @@ class DatabaseManager:
             os.makedirs(DatabaseManager.DB_BASEDIR, exist_ok=True)
             lock = FSLock(DatabaseManager.LOCKFILE)
             if lock.acquire() is False:
-                logger.debug(f"PID={config.pid};failed to acquire lock for database initialization")
                 time.sleep(5)
                 return
-            logger.info(f"PID={config.pid};acquired lock for database initialization")
 
             try:
                 with sqlite3.connect(DatabaseManager.DB_PATH) as conn:
@@ -51,8 +49,6 @@ class DatabaseManager:
                     conn.commit()
             finally:
                 lock.release()
-                logger.info(f"PID={config.pid};released lock for database initialization")
-
 
     @staticmethod
     def create_new_session() -> int | None:
@@ -60,11 +56,10 @@ class DatabaseManager:
         session_id = None
         while True:
             lock = FSLock(DatabaseManager.LOCKFILE)
+            
             if lock.acquire() is False:
-                logger.debug(f"PID={config.pid};couldn't acquire lock for creating new session, sleep and retry")
                 time.sleep(1)
                 continue
-            logger.info(f"PID={config.pid};acquired lock for creating new session")
 
             try:
                 with sqlite3.connect(DatabaseManager.DB_PATH) as conn:
@@ -73,7 +68,6 @@ class DatabaseManager:
                     conn.commit()
             finally:
                 lock.release()
-                logger.info(f"PID={config.pid};released lock for creating new session")
             break
         logger.debug(f"PID={config.pid};created new session with ID {session_id}")
         return session_id
