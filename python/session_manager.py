@@ -8,7 +8,6 @@ class SessionManager:
     BASE_FPS_PER_REQUEST = 30
 
     def __init__(self):
-        DatabaseManager.initialize_database()
         self.session_id: int = DatabaseManager.create_new_session()
         self.session_count: int = DatabaseManager.get_active_session_count()
         print(f"Session {self.session_id} started, session count: {self.session_count}")
@@ -52,16 +51,24 @@ class SessionManager:
                 # Detect smiles in the frame
                 smiles = self.detect_smile(frame)
 
+                coords = []
                 # Draw rectangles around detected smiles
                 for (x, y, w, h) in smiles:
                     cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
-
+                    coords.append(
+                        { 
+                          "BL": [int(x),int(y)], 
+                          "BR": [int(x+w), int(y)], 
+                          "TL": [int(x), int(y+h)],  
+                          "TR": [int(x+w), int(y+h)] 
+                        }
+                    )
                 # Encode the frame as JPEG
                 _, buffer = cv2.imencode('.jpg', frame)
                 frame_bytes = buffer.tobytes()
 
                 # Write the frame to the database
-                DatabaseManager.write_frame_to_db(frame_bytes, self.session_id)
+                DatabaseManager.write_frame_to_db(frame_bytes, self.session_id, coords)
 
                 yield frame_bytes
                 self.session_count = DatabaseManager.get_active_session_count()
