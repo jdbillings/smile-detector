@@ -4,7 +4,7 @@ import sqlite3
 import time
 from smile_detector.filesystem_lock import FSLock
 
-with open(f"{os.path.dirname(__file__)}/conf/config.json", "r") as config_file:
+with open(f"{os.path.dirname(__file__)}/../conf/config.json", "r") as config_file:
     _DB_PATH = json.load(config_file)["sqlite"]["db_path"]
 
 class DatabaseManager:

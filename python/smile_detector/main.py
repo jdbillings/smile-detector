@@ -4,7 +4,7 @@ import os
 import json
 from flask_cors import CORS
 
-with open(f"{os.path.dirname(__file__)}/conf/config.json", "r") as config_file:
+with open(f"{os.path.dirname(__file__)}/../conf/config.json", "r") as config_file:
     app_name = json.load(config_file)["python"]["flask_app_name"]
 
 app = Flask(app_name)
