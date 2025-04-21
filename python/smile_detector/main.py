@@ -1,14 +1,12 @@
 from flask import Flask, Response, jsonify, request
 from smile_detector.session_manager import SessionManager
-import os
-import json
 from flask_cors import CORS
 
-with open(f"{os.path.dirname(__file__)}/../conf/config.json", "r") as config_file:
-    app_name = json.load(config_file)["python"]["flask_app_name"]
+from smile_detector.app_config import config, logger
 
-app = Flask(app_name)
+app = Flask(config.app_name)
 CORS(app)  # Enable CORS for all routes
+logger.info(f"PID={config.pid}; app created with name {config.app_name} (1)")
 
 
 @app.route('/create-session', methods=['POST'])
@@ -66,7 +64,7 @@ def close_session(session_id):
 
 def debug():
     # run the Flask app in debug mode
-    app.run(host='127.0.0.1', port=5050, debug=True)
+    app.run(host=config.hostname, port=config.port, debug=True)
 
 if __name__ == "__main__":
     debug()
