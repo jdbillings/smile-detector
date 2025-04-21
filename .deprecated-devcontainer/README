@@ -1,0 +1,3 @@
+Well, this was an absolutely cursed idea...
+MacOS doesn't make cameras (and other device drivers) available via /dev on the filesystem.
+The webcam in particular needs to be accessed either via QTKit or via AVFoundation.

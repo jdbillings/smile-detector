@@ -9,4 +9,7 @@ pip install ipython # for developer convenience
 make install-deps
 
 
+sudo apt install -y libgl1 x11-apps
+
+
 echo "post-create.sh: Success"
