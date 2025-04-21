@@ -16,6 +16,7 @@ build:
 
 run: 
 	@echo "Running the project..."
-	@echo "TODO" && exit 1
+	@bash -c '(cd python ; gunicorn -c conf/gunicorn.conf.py main:app)'
+	
 
 .PHONY: make-virtualenv install-deps

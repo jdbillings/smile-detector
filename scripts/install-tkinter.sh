@@ -1,5 +1,8 @@
 #!/bin/bash -e
 
+# todo: do I need tkinter anymore? probably not
+
+
 if which brew ; then 
     yes | brew install python-tk
     exit 0
