@@ -36,6 +36,7 @@ class DatabaseManager:
             conn.commit()
             return session_id
 
+
     @staticmethod
     def get_active_session_count():
         with sqlite3.connect(DatabaseManager.DB_PATH) as conn:
