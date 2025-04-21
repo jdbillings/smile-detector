@@ -1,38 +1,24 @@
 import cv2
-from tkinter import Tk, Label
-from PIL import Image, ImageTk
+from flask import Flask, Response
 
-def update_frame_closure(cap: cv2.VideoCapture, video_label: Label):
-    def update_frame():
-        ret, frame = cap.read()
-        if ret:
-            frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-            img = Image.fromarray(frame)
-            imgtk = ImageTk.PhotoImage(image=img)
-            video_label.imgtk = imgtk
-            video_label.configure(image=imgtk)
-        video_label.after(10, update_frame)
-    return update_frame
+app = Flask(__name__)
 
-def main():
-    # Initialize webcam
+def generate_frames():
     cap = cv2.VideoCapture(0)
+    while True:
+        success, frame = cap.read()
+        if not success:
+            break
+        else:
+            # Encode the frame as JPEG
+            _, buffer = cv2.imencode('.jpg', frame)
+            frame = buffer.tobytes()
+            yield (b'--frame\r\n'
+                   b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
 
-    # Create GUI window
-    root = Tk()
-    root.title("Webcam Viewer")
-    video_label = Label(root)
-    video_label.pack()
-
-    # Start updating frames
-    update_frame = update_frame_closure(cap, video_label)
-    update_frame()
-    # Run the GUI loop
-    root.mainloop()
-
-    # Release the webcam when the GUI is closed
-    cap.release()
-    cv2.destroyAllWindows()
+@app.route('/video_feed')
+def video_feed():
+    return Response(generate_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
 
 if __name__ == "__main__":
-    main()
+    app.run(host="0.0.0.0", port=5000, debug=True)
