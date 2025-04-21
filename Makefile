@@ -15,7 +15,7 @@ build-wheel:
 
 install-wheel: build-wheel
 	@echo "Installing the wheel..."
-	@bash -c '(source venv/bin/activate ; cd python; pip uninstall smile_detector ; pip install dist/*.whl)'
+	@bash -c '(source venv/bin/activate ; cd python; pip uninstall -y smile_detector ; pip install dist/*.whl)'
 
 install-react:
 	@echo "Installing the React app..."
