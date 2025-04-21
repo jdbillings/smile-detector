@@ -1,13 +1,22 @@
 [project]
-name = "smile-detector"
+name = "smile_detector"
 version = "0.1"
 description = "Detects a smiling face from a webcam feed"
-authors = ["Josh Billings <jdb1025777@gmail.com>"]
+authors = [
+   {name = "Josh Billings", email = "jdb1025777@gmail.com"},
+]
+
 license = "GPL-3.0-or-later"
-license-files = 
 requires-python = ">= 3.11"
-dependencies = [pillow, tkinter] # todo
+dynamic = ["dependencies", "optional-dependencies"]
 
 [build-system]
 requires = ["setuptools >= 77.0.3"]
 build-backend = "setuptools.build_meta"
+
+[tool.setuptools.dynamic]
+dependencies = {file = ["requirements.txt"]}
+optional-dependencies = {dev = { file = ["requirements-dev.txt"] }}
+
+[project.scripts]
+smiledetector = "main:main"
