@@ -9,8 +9,8 @@ pip install ipython # for developer convenience
 
 make install-deps
 
-sudo unminimize -y
-sudo apt-get update -y 
+sudo yes | unminimize
+sudo apt-get update -y
 sudo apt-get install -y shellcheck
 
 echo "Success"
