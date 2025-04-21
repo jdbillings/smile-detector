@@ -11,11 +11,11 @@ install-requirements:
 
 build-wheel:
 	@echo "Building the project..."
-	@bash -c '(cd python; python -m build --wheel)'
+	@bash -c '(source venv/bin/activate ; cd python; python -m build --wheel)'
 
 install-wheel: build-wheel
 	@echo "Installing the wheel..."
-	@bash -c '(cd python; pip uninstall smile_detector ; pip install dist/*.whl)'
+	@bash -c '(source venv/bin/activate ; cd python; pip uninstall smile_detector ; pip install dist/*.whl)'
 
 install-react:
 	@echo "Installing the React app..."
@@ -26,7 +26,7 @@ rebuild-all:
 	@bash scripts/rebuild-all.sh
 	@printf "%s\n%s\n%s\n" "----------------------------------------" "Done" "----------------------------------------"
 
-run-python:
+run-gunicorn:
 	@printf "%s\n%s\n%s\n" "----------------------------------------" "Running Python server..." "----------------------------------------"
 	@bash -c '(source venv/bin/activate && . scripts/run-gunicorn.sh)'
 
