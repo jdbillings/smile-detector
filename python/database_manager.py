@@ -1,13 +1,14 @@
-import sqlite3
 import os
 import json
-import multiprocessing
+import sqlite3
 import time
 from filesystem_lock import FSLock
 
+with open(f"{os.path.dirname(__file__)}/conf/config.json", "r") as config_file:
+    _DB_PATH = json.load(config_file)["sqlite"]["db_path"]
 
 class DatabaseManager:
-    DB_PATH = "/tmp/smiledetector/frames.db"
+    DB_PATH = _DB_PATH
     DB_BASEDIR = os.path.dirname(DB_PATH)
     LOCKFILE = os.path.join(DB_BASEDIR, "LOCK")
 

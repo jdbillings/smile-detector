@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# recounts react commands I ran to initialize the project
+
 SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 cd "$SCRIPT_DIR/../javascript"
 yes | npx create-react-app react-video-app --template typescript 

@@ -1,0 +1,5 @@
+{
+    "sqlite": {
+        "db_path": "/tmp/smiledetector/frames.db"
+    }
+}

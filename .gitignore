@@ -7,3 +7,7 @@
 **/*.db
 **/*.sqlite
 **/*.log
+**/.mypy_cache
+**/.pytest_cache
+**/dist
+

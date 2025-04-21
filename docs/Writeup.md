@@ -1,4 +1,6 @@
 ## Project Writeup
+Basically just copying the email (with a few additional notes)
+
 #### Headers
 ```
 Created at:    Wed, Apr 16, 2025 at 4:55 PM (Delivered after 4 seconds)
