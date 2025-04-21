@@ -1,11 +1,11 @@
 import cv2
 import time
-from smile_detector.database_manager import DatabaseManager
-
+import traceback
 from typing import Tuple, Self
 from cv2.typing import MatLike
 from cv2.data import haarcascades as haar_path
 
+from smile_detector.database_manager import DatabaseManager
 from smile_detector.app_config import config, logger
 logger.debug(f"PID={config.pid};Loading session manager")
 
@@ -110,8 +110,8 @@ class SessionManager:
         while True:
             try:
                 frame = next(genrtr)
-            except:
-                logger.error("Producer failed, stopping frame generation.")
+            except Exception as e:
+                logger.error(f"PID={config.pid};Producer failed, stopping frame generation;{traceback.format_exc()}")
                 self.close()
                 raise
             if frame:
