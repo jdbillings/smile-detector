@@ -11,7 +11,7 @@ install-requirements:
 
 build-wheel:
 	@echo "Building the project..."
-	@bash -c '(cd python; python -m build --wheel --out-dir dist)'
+	@bash -c '(cd python; python -m build --wheel)'
 
 install-wheel: build-wheel
 	@echo "Installing the wheel..."
@@ -21,25 +21,20 @@ install-react:
 	@echo "Installing the React app..."
 	@bash -c '(cd javascript/react-video-app ; npm install)'
 
-run-react: install-react
-	@echo "Running the React app..."
-	@bash -c '(cd javascript/react-video-app ; npm install && npm start)'
 
-run: install-wheel
-	@echo "Running the project..."
-	@bash -c '(cd python ; gunicorn -c conf/gunicorn.conf.py main:app)'
-
-all:
-	@bash scripts/run-all.sh
+rebuild-all:
+	@printf "%s\n%s\n%s\n" "----------------------------------------" "Rebuilding all..." "----------------------------------------"
+	@bash scripts/rebuild-all.sh
+	@printf "%s\n%s\n%s\n" "----------------------------------------" "Done" "----------------------------------------"
 
 clean:
 	@printf "%s\n%s\n%s\n" "----------------------------------------" "Cleaning up..." "----------------------------------------"
 #delete build artifacts
 	@bash -c '(cd python ; rm -rf dist build *.egg-info)'
 #delete sqlite database
-	@bash -c '(cd python/conf ; python -c 'import json, shutil; shutil.rmtree( json.load( open("config.json", "r") )["sqlite"]["db_path"]  )' )'
+	@bash -c 'python scripts/cleanup-db.py'
 #delete venv
 	@bash -c '(cd python ; rm -rf venv)'
 	@printf "%s\n%s\n%s\n" "----------------------------------------" "Done" "----------------------------------------"
 
-.PHONY: virtualenv install-requirements run-react run clean all
+.PHONY: virtualenv install-requirements run-react run-gunicorn clean rebuild-all
