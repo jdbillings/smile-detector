@@ -1,9 +1,10 @@
 import cv2
 import time
-from database_manager import DatabaseManager
+from smile_detector.database_manager import DatabaseManager
 import logging
 from typing import Tuple, Self
 from cv2.typing import MatLike
+from cv2.data import haarcascades as haar_path
 
 logger = logging.getLogger(__name__)
 DatabaseManager.initialize_database()
@@ -13,7 +14,7 @@ class SessionManager:
     """Class to manage sessions and their metadata."""
     BASE_FPS_PER_REQUEST = 30
     # Load Haar cascade for smile detection
-    smile_cascade = cv2.CascadeClassifier("haarcascade_smile.xml")
+    smile_cascade = cv2.CascadeClassifier(haar_path + "haarcascade_smile.xml")
 
     def __init__(self, session_id: int | None = None):
         self.session_id: int | None = session_id
@@ -38,10 +39,6 @@ class SessionManager:
             DatabaseManager.deactivate_session(self.session_id)
             logger.info(f"Session {self.session_id} ended.")
             self.session_id = None
-
-    def __del__(self):
-        """Destructor to ensure the session is closed."""
-        self.close()
 
     def detect_smile(self, frame: MatLike) -> list:
         """Detect a smile in the given frame and return the coordinates of the rectangle."""
@@ -106,7 +103,6 @@ class SessionManager:
 
         return DatabaseManager.get_latest_coords(session_id)
 
-
     def generate_frame_responses(self):
         """Generate responses for the frames."""
         genrtr = self.produce_frames()
@@ -120,4 +116,3 @@ class SessionManager:
             if frame:
                 yield (b'--frame\r\n'
                        b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
-

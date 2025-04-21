@@ -1,5 +1,8 @@
 {
     "sqlite": {
         "db_path": "/tmp/smiledetector/frames.db"
+    },
+    "python": {
+        "flask_app_name": "smiledetector"
     }
 }
