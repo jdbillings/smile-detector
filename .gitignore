@@ -10,4 +10,5 @@
 **/.mypy_cache
 **/.pytest_cache
 **/dist
-
+**/package-lock.json
+**/node_modules
