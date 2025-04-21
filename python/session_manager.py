@@ -37,7 +37,7 @@ class SessionManager:
                 frame_bytes = buffer.tobytes()
                 DatabaseManager.write_frame_to_db(frame_bytes, self.session_id)
                 yield frame_bytes
-                self.update_session_count()
+                self.session_count = DatabaseManager.get_active_session_count()
                 # Control the frame rate based on the session count
                 time.sleep(min(0.8, self.session_count / self.BASE_FPS_PER_REQUEST))
             else:
