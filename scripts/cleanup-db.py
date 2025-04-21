@@ -9,6 +9,6 @@ if __name__ == "__main__":
     with open(config_path , "r") as f:
         dbpath = json.load(f)["sqlite"]["db_path"]
         try:
-            shutil.rmtree(dbpath)
-        except FileNotFoundError:
+            shutil.rmtree(os.path.dirname(dbpath))
+        except:
             pass

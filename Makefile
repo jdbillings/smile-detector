@@ -15,17 +15,20 @@ build-wheel:
 
 install-wheel: build-wheel
 	@echo "Installing the wheel..."
-	@bash -c '(cd python; pip install dist/*.whl)'
+	@bash -c '(cd python; pip uninstall smile_detector ; pip install dist/*.whl)'
 
 install-react:
 	@echo "Installing the React app..."
 	@bash -c '(cd javascript/react-video-app ; npm install)'
 
-
 rebuild-all:
 	@printf "%s\n%s\n%s\n" "----------------------------------------" "Rebuilding all..." "----------------------------------------"
 	@bash scripts/rebuild-all.sh
 	@printf "%s\n%s\n%s\n" "----------------------------------------" "Done" "----------------------------------------"
+
+run-python:
+	@printf "%s\n%s\n%s\n" "----------------------------------------" "Running Python server..." "----------------------------------------"
+	@bash -c '(source venv/bin/activate && . scripts/run-gunicorn.sh)'
 
 clean:
 	@printf "%s\n%s\n%s\n" "----------------------------------------" "Cleaning up..." "----------------------------------------"

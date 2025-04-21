@@ -1,6 +1,6 @@
 #!/bin/bash -e
 
-for service_str in "gunicorn" "react" "python" "node" "sqlite"; do
+for service_str in "gunicorn" "react" "npm" "sqlite"; do
     # Check if the service is running
     if pgrep -if "$service_str" > /dev/null; then
         # Kill the process

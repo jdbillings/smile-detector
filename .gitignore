@@ -9,6 +9,7 @@
 **/*.log
 **/.mypy_cache
 **/.pytest_cache
+**/build
 **/dist
 **/package-lock.json
 **/node_modules
