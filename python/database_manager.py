@@ -14,7 +14,7 @@ class DatabaseManager:
     @staticmethod
     def initialize_database():
         """Initialize the SQLite database to store frames and the semaphore."""
-        
+
         if not os.path.exists(DatabaseManager.DB_PATH):
             os.makedirs(DatabaseManager.DB_BASEDIR, exist_ok=True)
             lock = FSLock(DatabaseManager.LOCKFILE)
@@ -30,7 +30,7 @@ class DatabaseManager:
                             id INTEGER PRIMARY KEY AUTOINCREMENT,
                             timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
                             frame BLOB,
-                            session_id INTEGER, 
+                            session_id INTEGER,
                             coords TEXT
                         )
                     """)
@@ -47,7 +47,7 @@ class DatabaseManager:
 
 
     @staticmethod
-    def create_new_session():
+    def create_new_session() -> int | None:
         """Create a new session in the SQLite database."""
         session_id = None
         while True:
@@ -65,6 +65,33 @@ class DatabaseManager:
         return session_id
 
 
+    @staticmethod
+    def get_session(session_id: int):
+        with sqlite3.connect(DatabaseManager.DB_PATH) as conn:
+            cursor = conn.execute("SELECT * FROM sessions WHERE id = ?", (session_id,))
+            session = cursor.fetchone()
+            if session:
+                return {
+                    "id": session[0],
+                    "timestamp": session[1],
+                    "active": session[2]
+                }
+            return None
+
+    @staticmethod
+    def get_active_session(session_id: int):
+        """Get the active session from the SQLite database."""
+        with sqlite3.connect(DatabaseManager.DB_PATH) as conn:
+            cursor = conn.execute("SELECT * FROM sessions WHERE id = ? AND active = 1", (session_id,))
+            session = cursor.fetchone()
+            if session:
+                return {
+                    "id": session[0],
+                    "timestamp": session[1],
+                    "active": session[2]
+                }
+            return None
+
 
     @staticmethod
     def get_active_session_count():
@@ -75,11 +102,11 @@ class DatabaseManager:
 
 
     @staticmethod
-    def write_frame_to_db(frame: bytes, session_id: int, coords: dict):
+    def write_frame_to_db(frame: bytes, session_id: int, coords: list[dict]):
         """Write a frame to the SQLite database."""
-        
+
         json_coords = json.dumps(coords)
-        
+
         with sqlite3.connect(DatabaseManager.DB_PATH) as conn:
             conn.execute("INSERT INTO frames (frame, session_id, coords) VALUES (?, ?, ?)", (frame, session_id, json_coords))
             conn.commit()
@@ -93,7 +120,7 @@ class DatabaseManager:
             conn.commit()
 
     @staticmethod
-    def get_latest_coords(session_id: int):
+    def get_latest_coords(session_id: int) -> dict:
         """Get the latest coordinates for a session."""
         with sqlite3.connect(DatabaseManager.DB_PATH) as conn:
             cursor = conn.execute(

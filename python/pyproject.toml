@@ -7,7 +7,7 @@ authors = [
 ]
 
 license = "GPL-3.0-or-later"
-requires-python = ">= 3.11"
+requires-python = ">= 3.13"
 dynamic = ["dependencies", "optional-dependencies"]
 
 [build-system]
@@ -20,3 +20,8 @@ optional-dependencies = {dev = { file = ["requirements-dev.txt"] }}
 
 [project.scripts]
 smiledetector = "smile_detector.main:debug"
+
+
+[tool.mypy]
+python_version = "3.11"
+check_untyped_defs = true
