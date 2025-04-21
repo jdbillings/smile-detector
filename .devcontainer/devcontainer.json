@@ -25,7 +25,7 @@
 			]
 		}
 	},
-	"runArgs": ["--env DISPLAY=host.docker.internal:0"],
+	"containerEnv": {"DISPLAY": "host.docker.internal:0"},
 	"mounts": [
 		"source=${localEnv:HOME}${localEnv:USERPROFILE}/.ssh,target=/home/vscode/.ssh,type=bind,consistency=cached",
 		"source=/tmp/.X11-unix,target=/tmp/.X11-unix,type=bind,consistency=cached"
