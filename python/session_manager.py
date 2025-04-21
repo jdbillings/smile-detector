@@ -31,6 +31,7 @@ class SessionManager:
         """Producer logic that reads frames from the camera and writes to the database."""
         cap = cv2.VideoCapture(0)
         while True:
+            start = time.time()
             success, frame = cap.read()
             if success:
                 _, buffer = cv2.imencode('.jpg', frame)
@@ -38,8 +39,11 @@ class SessionManager:
                 DatabaseManager.write_frame_to_db(frame_bytes, self.session_id)
                 yield frame_bytes
                 self.session_count = DatabaseManager.get_active_session_count()
-                # Control the frame rate based on the session count
-                time.sleep(min(0.8, self.session_count / self.BASE_FPS_PER_REQUEST))
+
+                # Limit the frame rate to avoid contention on camera when we have concurrent sessions
+                max_allowed_delay = max(1.0 - (time.time() - start), 0)
+                balanced_delay = self.session_count / self.BASE_FPS_PER_REQUEST
+                time.sleep(min(max_allowed_delay, balanced_delay))
             else:
                 cap.release()
                 self.close()

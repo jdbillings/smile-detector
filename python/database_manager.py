@@ -19,7 +19,7 @@ class DatabaseManager:
                     )
                 """)
                 conn.execute("""
-                    CREATE TABLE sessions (                    
+                    CREATE TABLE sessions (
                         id INTEGER PRIMARY KEY AUTOINCREMENT,
                         timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
                         active BOOLEAN
@@ -50,6 +50,7 @@ class DatabaseManager:
         with sqlite3.connect(DatabaseManager.DB_PATH) as conn:
             conn.execute("INSERT INTO frames (frame, session_id) VALUES (?, ?)", (frame, session_id))
             conn.commit()
+
 
     @staticmethod
     def deactivate_session(session_id: int):
