@@ -7,15 +7,15 @@ from smile_detector.app_config import config, logger
 
 app = Flask(config.app_name)
 CORS(app)  # Enable CORS for all routes
-logger.info(f"PID={config.pid}; app created with name {config.app_name} (1)")
+logger.info(f"PID={config.pid}; app created with name {config.app_name}")
 
 
 @app.route('/create-session', methods=['POST'])
 def create_session() -> Any:
     """Create a new session and return its ID."""
     try:
-        session = SessionManager()
-        session_id = session.session_id
+        logger.debug("PID={Config.pid};Creating new session")
+        session_id = SessionManager().session_id
         return jsonify({"sessionId": session_id})
     except:
         msg = "Error creating session"
