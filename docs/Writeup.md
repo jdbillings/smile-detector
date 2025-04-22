@@ -38,7 +38,7 @@ Develop a small React application that communicates with a Python backend servic
     - Database migrations
     - Modern Python packaging
     - Write up how to run app
-    - linting
+    - Linting
 
 #### Conclusion
 If you did Angular in the past it will not take too much time to learn React. Basic rendering and hooks is all you need.
