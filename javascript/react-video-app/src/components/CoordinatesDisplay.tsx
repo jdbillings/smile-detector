@@ -19,6 +19,7 @@ const CoordinatesDisplay: React.FC<CoordinatesDisplayProps> = ({ sessionId }) =>
     const fetchCoords = async () => {
       try {
         const response = await axios.get(`http://localhost:5050/latest-coords/${sessionId}`);
+
         if (response.data && Array.isArray(response.data) && response.data.length > 0) {
           setCoords(response.data);
         }
@@ -28,8 +29,8 @@ const CoordinatesDisplay: React.FC<CoordinatesDisplayProps> = ({ sessionId }) =>
     };
 
     fetchCoords();
-    const intervalId = setInterval(fetchCoords, 1000);
-    
+    const intervalId = setInterval(fetchCoords, 300);
+
     return () => clearInterval(intervalId);
   }, [sessionId]);
 
