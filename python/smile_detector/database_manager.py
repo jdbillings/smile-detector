@@ -118,9 +118,18 @@ class DatabaseManager:
     @staticmethod
     def deactivate_session(session_id: int) -> bool:
         """Deactivate a session in the SQLite database."""
-        with sqlite3.connect(DatabaseManager.DB_PATH) as conn:
-            conn.execute("UPDATE sessions SET active = 0 WHERE id = ?", (session_id,))
-            conn.commit()
+        with sqlite3.connect(DatabaseManager.DB_PATH, autocommit=False) as conn:
+            for i in range(4):
+                try:
+                    cursor = conn.cursor()
+                    cursor.execute("UPDATE sessions SET active = 0 WHERE id = ?", (session_id,))
+                    conn.commit()
+                    break
+                except sqlite3.OperationalError as e:
+                    conn.rollback()
+                    if i >= 2:
+                        raise e
+                    time.sleep(1)
             logger.info(f"PID={config.pid};deactivated session {session_id} in database")
         return True
 
@@ -129,14 +138,15 @@ class DatabaseManager:
     def get_latest_coords(session_id: int) -> dict:
         """Get the latest coordinates for a session."""
         with sqlite3.connect(DatabaseManager.DB_PATH) as conn:
+            cursor = conn.cursor()
             cursor = conn.execute(
-                "SELECT coords FROM frames WHERE session_id = ? ORDER BY id DESC LIMIT 1",
+                "SELECT coords FROM frames WHERE session_id = ? AND has_smile = 1 ORDER BY TIMESTAMP DESC LIMIT 1",
                 (session_id,)
             )
             result = cursor.fetchone()
             if result and result[0]:
-                logger.debug(f"PID={config.pid};retrieved latest coordinates for session {session_id}")
-                return dict(json.loads(result[0]))
+                logger.debug(f"PID={config.pid};retrieved latest coordinates for session {session_id}, json_str={result[0]}")
+                return json.loads(result[0])
             else:
                 logger.debug(f"PID={config.pid};no coordinates found for session {session_id}")
                 return {}
