@@ -8,7 +8,7 @@ from typing import Any
 class _AppConfig:
     """Configuration class for the application."""
     def __init__(self) -> None:
-        with open(f"{os.path.dirname(__file__)}/../conf/config.json", "r") as config_file:
+        with open(f"{os.path.dirname(__file__)}/conf/config.json", "r") as config_file:
             cfg = json.load(config_file)
         self.database_path: str = cfg['sqlite']["db_path"]
         self.app_name: str = cfg['python']["flask_app_name"]

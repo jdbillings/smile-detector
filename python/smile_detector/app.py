@@ -69,7 +69,7 @@ def close_session(session_id: int) -> Any:
 def dump_smiles():
     """Dumps smiles to an absolute path on the file system."""
     try:
-        canonical_path = request.form.get("canonical_path")
+        canonical_path = request.json.get("canonical_path")
         if not canonical_path:
             return jsonify({"error": "No path provided"}), 400
 
