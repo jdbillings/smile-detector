@@ -20,7 +20,7 @@ Then, run `make rebuild-all` from the project root to configure a virtualenv wit
 Open two terminal windows and navigate to the project root. In the first one, run `make run-gunicorn` to start the flask backend server, and in the second, run `scripts/run-react.sh` to start the react development server. The former will serve on `localhost:5050`, and the latter will serve on `localhost:3000`. Next, visit `localhost:3000` in your browser to view the application. Start the camera feed and smile to get the boxes/coordinates to appear. See ("Model Selection + Tuning" section of System Design Notes)[System-Design-Notes.md] for a discussion on how the accuracy of the smile detection could be improved. 
 
 ## How to run tests
-- `make pytest` runs the test suite in `python/test/test_export.py`
+- `make pytests` runs the test suite in `python/test/test_export.py`
 - `make lint` runs mypy linter
 
 ## How to modify configuration
