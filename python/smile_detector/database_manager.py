@@ -2,7 +2,6 @@ import os
 import json
 import sqlite3
 import time
-from smile_detector.filesystem_lock import FSLock
 
 from smile_detector.app_config import config, logger
 logger.debug(f"PID={config.pid};loading database manager")
@@ -11,64 +10,51 @@ logger.debug(f"PID={config.pid};loading database manager")
 class DatabaseManager:
     DB_PATH: str = config.database_path
     DB_BASEDIR: str = os.path.dirname(DB_PATH)
-    LOCKFILE: str = os.path.join(DB_BASEDIR, "LOCK")
 
     @staticmethod
     def initialize_database() -> None:
-        """Initialize the SQLite database to store frames and the semaphore."""
-
+        """Initialize the SQLite database."""
         logger.info(f"PID={config.pid};Initializing database at {DatabaseManager.DB_PATH}")
-        if not os.path.exists(DatabaseManager.DB_PATH):
-            os.makedirs(DatabaseManager.DB_BASEDIR, exist_ok=True)
-            lock = FSLock(DatabaseManager.LOCKFILE)
-            if lock.acquire() is False:
-                time.sleep(5)
-                return
+        os.makedirs(DatabaseManager.DB_BASEDIR, exist_ok=True)
 
+        with sqlite3.connect(DatabaseManager.DB_PATH) as conn:
             try:
-                with sqlite3.connect(DatabaseManager.DB_PATH) as conn:
-                    # Create a table for storing frames
-                    conn.execute("""
-                        CREATE TABLE frames (
-                            id INTEGER PRIMARY KEY AUTOINCREMENT,
-                            timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
-                            frame BLOB,
-                            coords TEXT,
-                            has_smile BOOLEAN DEFAULT 0,
-                            session_id INTEGER,
-                            FOREIGN KEY (session_id) REFERENCES sessions (id)
-                        )
-                    """)
-                    conn.execute("""
-                        CREATE TABLE sessions (
-                            id INTEGER PRIMARY KEY AUTOINCREMENT,
-                            timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
-                            active BOOLEAN
-                        )
-                    """)
-                    conn.commit()
-            finally:
-                lock.release()
+                conn.executescript("""
+                    CREATE TABLE IF NOT EXISTS frames (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+                        frame BLOB,
+                        coords TEXT,
+                        has_smile BOOLEAN DEFAULT 0,
+                        session_id INTEGER,
+                        FOREIGN KEY (session_id) REFERENCES sessions (id)
+                    );
+                    CREATE TABLE IF NOT EXISTS sessions (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+                        active BOOLEAN
+                    );
+                """)
+                conn.commit()
+            except sqlite3.OperationalError:
+                pass # Ignore errors in creating tables
 
     @staticmethod
     def create_new_session() -> int | None:
         """Create a new session in the SQLite database."""
         session_id = None
-        while True:
-            lock = FSLock(DatabaseManager.LOCKFILE)
-            
-            if lock.acquire() is False:
-                time.sleep(1)
-                continue
-
-            try:
-                with sqlite3.connect(DatabaseManager.DB_PATH) as conn:
-                    cursor = conn.execute("INSERT INTO sessions (active) VALUES (1)")
+        
+        with sqlite3.connect(DatabaseManager.DB_PATH, autocommit=False) as conn:
+            for _retry_ in range(3):
+                try:
+                    cursor = conn.cursor()
+                    cursor.execute("INSERT INTO sessions (active) VALUES (1); ")
                     session_id = cursor.lastrowid
                     conn.commit()
-            finally:
-                lock.release()
-            break
+                except sqlite3.OperationalError as e:
+                    conn.rollback()
+                    time.sleep(1)
+
         logger.debug(f"PID={config.pid};created new session with ID {session_id}")
         return session_id
 
@@ -88,6 +74,7 @@ class DatabaseManager:
             else:
                 logger.debug(f"PID={config.pid};session {session_id} not found in database")
                 return None
+
 
     @staticmethod
     def get_active_session(session_id: int) -> dict | None:
@@ -136,6 +123,7 @@ class DatabaseManager:
             conn.commit()
             logger.info(f"PID={config.pid};deactivated session {session_id} in database")
         return True
+
 
     @staticmethod
     def get_latest_coords(session_id: int) -> dict:

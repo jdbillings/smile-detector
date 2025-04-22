@@ -14,7 +14,7 @@ logger.info(f"PID={config.pid}; app created with name {config.app_name}")
 def create_session() -> Any:
     """Create a new session and return its ID."""
     try:
-        logger.debug("PID={Config.pid};Creating new session")
+        logger.debug(f"PID={config.pid};Creating new session")
         session_id = SessionManager().session_id
         return jsonify({"sessionId": session_id})
     except:
@@ -30,7 +30,7 @@ def video_feed(session_id: int) -> Any:
         r = Response(SM.generate_frame_responses(), mimetype='multipart/x-mixed-replace; boundary=frame')
         return r
     except:
-        msg = "Error in video generator for session {session_id}"
+        msg = f"Error in video generator for session {session_id}"
         logger.warning(f"PID={config.pid};{msg}")
         return jsonify({"error": f"{msg}"}), 500
 
@@ -42,7 +42,7 @@ def latest_coords(session_id: int) -> Any:
         coords = SM.get_latest_coords(session_id)
         return jsonify(coords)
     except:
-        msg = "Error getting coords for session {session_id}"
+        msg = f"Error getting coords for session {session_id}"
         logger.warning(f"PID={config.pid};{msg}")
         return jsonify({"error": f"{msg}"}), 500
 
@@ -60,7 +60,7 @@ def close_session(session_id: int) -> Any:
         SM.close()
         return jsonify({"message": f"Session {session_id} closed successfully"})
     except:
-        msg=f"Error closing session {session_id}"
+        msg = f"Error closing session {session_id}"
         logger.error(f"PID={config.pid};{msg}")
         return jsonify({"error": "{msg}"}), 500
 

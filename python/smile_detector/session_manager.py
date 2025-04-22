@@ -23,6 +23,7 @@ class SessionManager:
         self.active: bool = False
         self.timestamp: float | None = None
         self.request_counter: int = 0
+        self._setup_session()
 
     def _setup_session(self) -> None:
         if self.session_id is None:
@@ -41,7 +42,7 @@ class SessionManager:
     def close(self) -> None:
         """Close the session and update the database."""
         if self.session_id is None:
-            logger.warning("pid=${config.pid}; attempting to close session object without a session ID")
+            logger.warning(f"pid={config.pid}; attempting to close session object without a session ID")
         else:
             DatabaseManager.deactivate_session(self.session_id)
             logger.info(f"Session {self.session_id} ended.")
@@ -135,6 +136,7 @@ class SessionManager:
     def generate_frame_responses(self) -> Iterator[bytes]:
         """Generate responses for the frames."""
         genrtr = self._produce_frames()
+        
         while True:
             try:
                 frame = next(genrtr)
@@ -143,9 +145,9 @@ class SessionManager:
                        b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
             except StopIteration:
                 logger.info(f"PID={config.pid};Producer finished, stopping frame generation")
+                self.close()
                 break
             except Exception as e:
                 logger.error(f"PID={config.pid};Producer failed, stopping frame generation;{traceback.format_exc()}")
-                raise
-            finally:
                 self.close()
+                raise

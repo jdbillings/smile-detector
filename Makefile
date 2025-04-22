@@ -13,7 +13,7 @@ build-wheel:
 	@echo "Building the project..."
 	@bash -c '(source venv/bin/activate ; cd python; python -m build --wheel)'
 
-install-wheel: build-wheel
+install-wheel: 
 	@echo "Installing the wheel..."
 	@bash -c '(source venv/bin/activate ; cd python; pip uninstall -y smile_detector ; pip install dist/*.whl)'
 
@@ -42,11 +42,11 @@ run-gunicorn:
 clean:
 	@printf "%s\n%s\n%s\n" "----------------------------------------" "Cleaning up..." "----------------------------------------"
 #delete build artifacts
-	@bash -c '(cd python ; rm -rf dist build *.egg-info .mypy_cache __pycache__)'
+	@bash -c '(cd python ; rm -rf dist build *.egg-info .mypy_cache __pycache__ conf/__pycache__ smile_detector/__pycache__)'
 #delete sqlite database
 	@bash -c 'python scripts/cleanup-db.py'
 #delete venv
-	@bash -c rm -rf venv
+	@bash -c 'rm -rf venv .mypy_cache'
 	@printf "%s\n%s\n%s\n" "----------------------------------------" "Done" "----------------------------------------"
 
 .PHONY: virtualenv install-requirements run-react run-gunicorn clean rebuild-all lint install-wheel install-react

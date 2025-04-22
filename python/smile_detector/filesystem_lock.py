@@ -15,7 +15,7 @@ class FSLock:
         Acquire the lock by creating a lock file.
         """
         try:
-            with open(self.lock_file, 'x') as f:
+            with open(self.lock_file, 'w') as f:
                 f.write('LOCK')
             logger.info(f"PID={config.pid}; Lock acquired: {self.lock_file}")
             return True
