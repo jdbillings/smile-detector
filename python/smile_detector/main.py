@@ -1,6 +1,7 @@
 from flask import Flask, Response, jsonify
 from smile_detector.session_manager import SessionManager
 from flask_cors import CORS
+import os
 import traceback
 from typing import Any
 from smile_detector.app_config import config, logger
@@ -63,6 +64,24 @@ def close_session(session_id: int) -> Any:
         msg = f"Error closing session {session_id}"
         logger.error(f"PID={config.pid};{msg}")
         return jsonify({"error": "{msg}"}), 500
+
+@app.route("/dump-smiles/<str:canonicalPath>", methods=["GET"])
+def dump_smiles(canonicalPath: str) -> Any:
+    """Dumps smiles to an absolute path on the local filesystem."""
+    # Check if the path is absolute
+    if not os.path.isabs(canonicalPath):
+        msg = f"Path {canonicalPath} is not absolute"
+        logger.error(f"PID={config.pid};{msg}")
+        return jsonify({"error": f"{msg}"}), 400
+
+    try:
+        SessionManager.dump_smiles(canonicalPath)
+        return jsonify({"message": "Smiles exported successfully"})
+    except Exception as e:
+        msg = f"Error exporting smiles: {e}"
+        logger.error(f"PID={config.pid};{msg}")
+        return jsonify({"error": f"{msg}"}), 500
+
 
 def debug() -> None:
     # run the Flask app in debug mode

@@ -136,7 +136,7 @@ class SessionManager:
     def generate_frame_responses(self) -> Iterator[bytes]:
         """Generate responses for the frames."""
         genrtr = self._produce_frames()
-        
+
         while True:
             try:
                 frame = next(genrtr)
@@ -150,3 +150,9 @@ class SessionManager:
                 logger.error(f"PID={config.pid};Producer failed, stopping frame generation;{traceback.format_exc()}")
                 self.close()
                 raise
+
+    @staticmethod
+    def dump_smiles(output_path: str) -> None:
+        """Export smiles to the specified output path."""
+        DatabaseManager.export_smiles(output_path)
+        logger.info(f"PID={config.pid};Exported smiles to {output_path}")

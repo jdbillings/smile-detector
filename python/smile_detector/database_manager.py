@@ -43,7 +43,7 @@ class DatabaseManager:
     def create_new_session() -> int | None:
         """Create a new session in the SQLite database."""
         session_id = None
-        
+
         with sqlite3.connect(DatabaseManager.DB_PATH, autocommit=False) as conn:
             for _retry_ in range(3):
                 try:
@@ -150,3 +150,44 @@ class DatabaseManager:
             else:
                 logger.debug(f"PID={config.pid};no coordinates found for session {session_id}")
                 return {}
+
+    @staticmethod
+    def export_smiles(output_path: str):
+        with sqlite3.connect(DatabaseManager.DB_PATH) as conn:
+            cursor = conn.cursor()
+            cursor.execute("SELECT id, timestamp, frame, coords, session_id FROM frames WHERE has_smile = 1")
+
+            def generate_rows():
+                while True:
+                    row = cursor.fetchone()
+                    if row is None or len(row) == 0:
+                        break
+                    yield row
+
+            for row in generate_rows():
+                frame_id = row[0]
+                timestamp = row[1]
+                frame = row[2]
+                coords = json.loads(row[3])
+                session_id = row[4]
+
+                session_dir = os.path.join(output_path, str(session_id))
+                frame_dir = os.path.join(session_dir, str(frame_id))
+                frame_fname = os.path.join(frame_dir, f"{frame_id}.jpg")
+                metadata_fname = os.path.join(frame_dir, f"{frame_id}.json")
+
+                os.makedirs(frame_dir, exist_ok=True)
+                with open(metadata_fname, "w") as f1:
+                    json.dump({
+                        "timestamp": timestamp,
+                        "coords": coords,
+                        "session_id": session_id
+                    }, f1)
+
+                with open(frame_fname, "wb") as f2:
+                    f2.write(frame)
+
+                logger.debug(f"PID={config.pid};exported frame {frame_id} for session {session_id} to {frame_fname}")
+
+        logger.info(f"PID={config.pid};exported smiles to {output_path}")
+        return True
