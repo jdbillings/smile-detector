@@ -14,6 +14,8 @@ This was only tested on MacOS, but in theory, it should work cross-platform rela
 
 To start, make sure the above system dependencies are available. 
 
+Next, clone the `main` branch of this repository. 
+
 Then, run `make rebuild-all` from the project root to configure a virtualenv with all required python packages installed, and also to install all npm packages needed for the React app. 
 
 ## How to run the web app
