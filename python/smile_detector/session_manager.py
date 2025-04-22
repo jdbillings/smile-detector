@@ -145,7 +145,6 @@ class SessionManager:
                        b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
             except StopIteration:
                 logger.info(f"PID={config.pid};Producer finished, stopping frame generation")
-                self.close()
                 break
             except Exception as e:
                 logger.error(f"PID={config.pid};Producer failed, stopping frame generation;{traceback.format_exc()}")

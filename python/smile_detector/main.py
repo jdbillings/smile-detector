@@ -1,7 +1,7 @@
 from flask import Flask, Response, jsonify
 from smile_detector.session_manager import SessionManager
 from flask_cors import CORS
-
+import traceback
 from typing import Any
 from smile_detector.app_config import config, logger
 
@@ -41,9 +41,9 @@ def latest_coords(session_id: int) -> Any:
         SM = SessionManager(session_id)
         coords = SM.get_latest_coords(session_id)
         return jsonify(coords)
-    except:
+    except Exception as e:
         msg = f"Error getting coords for session {session_id}"
-        logger.warning(f"PID={config.pid};{msg}")
+        logger.warning(f"PID={config.pid};{msg};{traceback.format_exc()}")
         return jsonify({"error": f"{msg}"}), 500
 
 @app.route('/close-session/<int:session_id>', methods=['POST'])
