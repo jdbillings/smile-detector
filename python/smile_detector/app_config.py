@@ -2,7 +2,7 @@ import json
 import logging
 import os
 
-class AppConfig:
+class _AppConfig:
     """Configuration class for the application."""
     def __init__(self):
         self.app_name = None
@@ -11,16 +11,13 @@ class AppConfig:
         self.logger = None
         self.hostname = None
         self.port = None
-        self.pid = os.getpid()
-        self.initialize()
+        self.webcam_index = None
+        self.pid = None
+        self._initialize()
+        
 
 
-    def initialize(self):
-        self.get_config()
-        self.logger = self.getLogger()
-
-
-    def get_config(self):
+    def _initialize(self):
         """Get the application configuration."""
         with open(f"{os.path.dirname(__file__)}/../conf/config.json", "r") as config_file:
             cfg = json.load(config_file)
@@ -30,13 +27,18 @@ class AppConfig:
         self.database_path = cfg['sqlite']["db_path"]
         self.hostname = cfg['python']["network"]["hostname"]
         self.port = cfg['python']["network"]["port"]
+        self.webcam_index = cfg['python'].get("webcam_index", 0)
+        self.pid = os.getpid()
+
+        self.logger = self._get_logger()
 
 
-    def getLogger(self):
+    def _get_logger(self):
         """Setup the logger for the application."""
         logging.config.dictConfig(self.logging_config)
         logger = logging.getLogger(self.app_name)
         return logger
-    
-config = AppConfig()
+
+
+config = _AppConfig()
 logger = config.logger
