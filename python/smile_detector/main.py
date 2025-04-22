@@ -1,7 +1,8 @@
-from flask import Flask, Response, jsonify, request
+from flask import Flask, Response, jsonify
 from smile_detector.session_manager import SessionManager
 from flask_cors import CORS
 
+from typing import Any
 from smile_detector.app_config import config, logger
 
 app = Flask(config.app_name)
@@ -10,7 +11,7 @@ logger.info(f"PID={config.pid}; app created with name {config.app_name} (1)")
 
 
 @app.route('/create-session', methods=['POST'])
-def create_session():
+def create_session() -> Any:
     """Create a new session and return its ID."""
     try:
         session = SessionManager()
@@ -22,7 +23,7 @@ def create_session():
         return jsonify({"error": f"{msg}"}), 500
 
 @app.route('/video_feed/<int:session_id>')
-def video_feed(session_id):
+def video_feed(session_id: int) -> Any:
     """Flask route to serve the video feed for a specific session."""
     try:
         SM = SessionManager(session_id)
@@ -34,7 +35,7 @@ def video_feed(session_id):
         return jsonify({"error": f"{msg}"}), 500
 
 @app.route('/latest-coords/<int:session_id>')
-def latest_coords(session_id):
+def latest_coords(session_id: int) -> Any:
     """Return the latest coordinates for the specified session."""
     try:
         SM = SessionManager(session_id)
@@ -46,7 +47,7 @@ def latest_coords(session_id):
         return jsonify({"error": f"{msg}"}), 500
 
 @app.route('/close-session/<int:session_id>', methods=['POST'])
-def close_session(session_id):
+def close_session(session_id: int) -> Any:
     """Close a specific session."""
     try:
         SM = SessionManager(session_id)
@@ -63,7 +64,7 @@ def close_session(session_id):
         logger.error(f"PID={config.pid};{msg}")
         return jsonify({"error": "{msg}"}), 500
 
-def debug():
+def debug() -> None:
     # run the Flask app in debug mode
     app.run(host=config.hostname, port=config.port, debug=True)
 

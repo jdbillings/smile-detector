@@ -1,7 +1,7 @@
 import cv2
 import time
 import traceback
-from typing import Tuple, Self
+from typing import Tuple, Iterator
 from cv2.typing import MatLike
 from cv2.data import haarcascades as haar_path
 
@@ -38,7 +38,7 @@ class SessionManager:
         self.active = session_metadata["active"]
 
 
-    def close(self):
+    def close(self) -> None:
         """Close the session and update the database."""
         if self.session_id is None:
             logger.warning("pid=${config.pid}; attempting to close session object without a session ID")
@@ -77,7 +77,7 @@ class SessionManager:
                 return False
         return True
 
-    def _produce_frames(self: Self):
+    def _produce_frames(self) -> Iterator[bytes]:
         """Producer logic that reads frames from the camera and writes to the database."""
         cap: cv2.VideoCapture = cv2.VideoCapture(self.webcam_idx)
         while True:
@@ -87,7 +87,7 @@ class SessionManager:
             if self._check_liveliness() is False:
                 cap.release()
                 # check_liveliness will call self.close if the db session is not active
-                return
+                break
 
             frame_result : Tuple[bool, MatLike | None] = cap.read()
             if frame_result[0] is False or frame_result[1] is None:
@@ -132,7 +132,7 @@ class SessionManager:
         return DatabaseManager.get_latest_coords(session_id)
 
 
-    def generate_frame_responses(self):
+    def generate_frame_responses(self) -> Iterator[bytes]:
         """Generate responses for the frames."""
         genrtr = self._produce_frames()
         while True:
@@ -141,8 +141,11 @@ class SessionManager:
                 assert frame
                 yield (b'--frame\r\n'
                        b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
+            except StopIteration:
+                logger.info(f"PID={config.pid};Producer finished, stopping frame generation")
+                break
             except Exception as e:
                 logger.error(f"PID={config.pid};Producer failed, stopping frame generation;{traceback.format_exc()}")
-                self.close()
                 raise
-
+            finally:
+                self.close()

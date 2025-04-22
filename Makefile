@@ -21,6 +21,15 @@ install-react:
 	@echo "Installing the React app..."
 	@bash -c '(cd javascript/react-video-app ; npm install)'
 
+lint:
+	@printf "%s\n%s\n%s\n" "----------------------------------------" "Running Python linting..." "----------------------------------------"
+	@bash -c '(source venv/bin/activate ; cd python ; mypy smile_detector )'
+
+	@printf "%s\n%s\n%s\n" "----------------------------------------" "Running React linting..." "----------------------------------------"
+	@bash -c '(cd javascript/react-video-app ; npm audit --production)'
+
+	@printf "%s\n%s\n%s\n" "----------------------------------------" "Done" "----------------------------------------"
+
 rebuild-all:
 	@printf "%s\n%s\n%s\n" "----------------------------------------" "Rebuilding all..." "----------------------------------------"
 	@bash scripts/rebuild-all.sh
@@ -33,11 +42,11 @@ run-gunicorn:
 clean:
 	@printf "%s\n%s\n%s\n" "----------------------------------------" "Cleaning up..." "----------------------------------------"
 #delete build artifacts
-	@bash -c '(cd python ; rm -rf dist build *.egg-info)'
+	@bash -c '(cd python ; rm -rf dist build *.egg-info .mypy_cache __pycache__)'
 #delete sqlite database
 	@bash -c 'python scripts/cleanup-db.py'
 #delete venv
-	@bash -c '(cd python ; rm -rf venv)'
+	@bash -c rm -rf venv
 	@printf "%s\n%s\n%s\n" "----------------------------------------" "Done" "----------------------------------------"
 
-.PHONY: virtualenv install-requirements run-react run-gunicorn clean rebuild-all
+.PHONY: virtualenv install-requirements run-react run-gunicorn clean rebuild-all lint install-wheel install-react

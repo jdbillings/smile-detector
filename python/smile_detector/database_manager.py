@@ -9,12 +9,12 @@ logger.debug(f"PID={config.pid};loading database manager")
 
 
 class DatabaseManager:
-    DB_PATH = config.database_path
-    DB_BASEDIR = os.path.dirname(DB_PATH)
-    LOCKFILE = os.path.join(DB_BASEDIR, "LOCK")
+    DB_PATH: str = config.database_path
+    DB_BASEDIR: str = os.path.dirname(DB_PATH)
+    LOCKFILE: str = os.path.join(DB_BASEDIR, "LOCK")
 
     @staticmethod
-    def initialize_database():
+    def initialize_database() -> None:
         """Initialize the SQLite database to store frames and the semaphore."""
 
         logger.info(f"PID={config.pid};Initializing database at {DatabaseManager.DB_PATH}")
@@ -74,7 +74,7 @@ class DatabaseManager:
 
 
     @staticmethod
-    def get_session(session_id: int):
+    def get_session(session_id: int) -> dict | None:
         with sqlite3.connect(DatabaseManager.DB_PATH) as conn:
             cursor = conn.execute("SELECT * FROM sessions WHERE id = ?", (session_id,))
             session = cursor.fetchone()
@@ -90,7 +90,7 @@ class DatabaseManager:
                 return None
 
     @staticmethod
-    def get_active_session(session_id: int):
+    def get_active_session(session_id: int) -> dict | None:
         """Get the active session from the SQLite database."""
         with sqlite3.connect(DatabaseManager.DB_PATH) as conn:
             cursor = conn.execute("SELECT * FROM sessions WHERE id = ? AND active = 1", (session_id,))
@@ -108,16 +108,16 @@ class DatabaseManager:
 
 
     @staticmethod
-    def get_active_session_count():
+    def get_active_session_count() -> int:
         with sqlite3.connect(DatabaseManager.DB_PATH) as conn:
             cursor = conn.execute("SELECT COUNT(*) FROM sessions WHERE active = 1")
-            session_count = cursor.fetchone()[0]
+            session_count: int = int(cursor.fetchone()[0])
             logger.debug(f"PID={config.pid};active session count: {session_count}")
             return session_count
 
 
     @staticmethod
-    def write_frame_to_db(frame: bytes, session_id: int, coords: list[dict]):
+    def write_frame_to_db(frame: bytes, session_id: int, coords: list[dict]) -> bool:
         """Write a frame to the SQLite database."""
         has_smile = len(coords) > 0
         json_coords = json.dumps(coords)
@@ -129,7 +129,7 @@ class DatabaseManager:
 
 
     @staticmethod
-    def deactivate_session(session_id: int):
+    def deactivate_session(session_id: int) -> bool:
         """Deactivate a session in the SQLite database."""
         with sqlite3.connect(DatabaseManager.DB_PATH) as conn:
             conn.execute("UPDATE sessions SET active = 0 WHERE id = ?", (session_id,))
@@ -148,7 +148,7 @@ class DatabaseManager:
             result = cursor.fetchone()
             if result and result[0]:
                 logger.debug(f"PID={config.pid};retrieved latest coordinates for session {session_id}")
-                return json.loads(result[0])
+                return dict(json.loads(result[0]))
             else:
                 logger.debug(f"PID={config.pid};no coordinates found for session {session_id}")
                 return {}
