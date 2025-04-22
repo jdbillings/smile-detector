@@ -1,4 +1,4 @@
-from flask import Flask, Response, jsonify
+from flask import Flask, Response, jsonify, request
 from smile_detector.session_manager import SessionManager
 from flask_cors import CORS
 import os
@@ -65,17 +65,21 @@ def close_session(session_id: int) -> Any:
         logger.error(f"PID={config.pid};{msg}")
         return jsonify({"error": "{msg}"}), 500
 
-@app.route("/dump-smiles/<str:canonicalPath>", methods=["GET"])
-def dump_smiles(canonicalPath: str) -> Any:
-    """Dumps smiles to an absolute path on the local filesystem."""
-    # Check if the path is absolute
-    if not os.path.isabs(canonicalPath):
-        msg = f"Path {canonicalPath} is not absolute"
-        logger.error(f"PID={config.pid};{msg}")
-        return jsonify({"error": f"{msg}"}), 400
-
+@app.route("/dump-smiles", methods=["POST"])
+def dump_smiles():
+    """Dumps smiles to an absolute path on the file system."""
     try:
-        SessionManager.dump_smiles(canonicalPath)
+        canonical_path = request.form.get("canonical_path")
+        if not canonical_path:
+            return jsonify({"error": "No path provided"}), 400
+
+        if not os.path.isabs(canonical_path):
+            return jsonify({"error": "Path must be absolute"}), 400
+
+        # Ensure path is normalized and resolved
+        safe_path = os.path.normpath(os.path.realpath(canonical_path))
+
+        SessionManager.dump_smiles(safe_path)
         return jsonify({"message": "Smiles exported successfully"})
     except Exception as e:
         msg = f"Error exporting smiles: {e}"

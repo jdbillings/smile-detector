@@ -2,6 +2,7 @@ import os
 import json
 import sqlite3
 import time
+import traceback
 
 from smile_detector.app_config import config, logger
 logger.debug(f"PID={config.pid};loading database manager")
@@ -15,10 +16,11 @@ class DatabaseManager:
     def initialize_database() -> None:
         """Initialize the SQLite database."""
         logger.info(f"PID={config.pid};Initializing database at {DatabaseManager.DB_PATH}")
+
         os.makedirs(DatabaseManager.DB_BASEDIR, exist_ok=True)
 
-        with sqlite3.connect(DatabaseManager.DB_PATH) as conn:
-            try:
+        try:
+            with sqlite3.connect(DatabaseManager.DB_PATH) as conn:
                 conn.executescript("""
                     CREATE TABLE IF NOT EXISTS frames (
                         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -36,8 +38,11 @@ class DatabaseManager:
                     );
                 """)
                 conn.commit()
-            except sqlite3.OperationalError:
-                pass # Ignore errors in creating tables
+        except sqlite3.OperationalError as e:
+            pass # Ignore errors in creating tables
+        except Exception as e:
+            logger.warning(f"PID={config.pid};Error initializing database: {traceback.format_exc()}")
+            pass
 
     @staticmethod
     def create_new_session() -> int | None:
