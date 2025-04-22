@@ -7,6 +7,7 @@ virtualenv:
 install-requirements:
 	@printf "%s\n%s\n%s\n" "----------------------------------------" "Installing dependencies..." "----------------------------------------"
 	@pip install -r python/requirements.txt
+	@pip install -r python/requirements-dev.txt
 	@printf "%s\n%s\n%s\n" "----------------------------------------" "Done" "----------------------------------------"
 
 build-wheel:
@@ -42,11 +43,17 @@ run-gunicorn:
 clean:
 	@printf "%s\n%s\n%s\n" "----------------------------------------" "Cleaning up..." "----------------------------------------"
 #delete build artifacts
-	@bash -c '(cd python ; rm -rf dist build *.egg-info .mypy_cache __pycache__ conf/__pycache__ smile_detector/__pycache__)'
+	@bash -c '(cd python ; rm -rf dist build *.egg-info .mypy_cache __pycache__ smile_detector/conf/__pycache__ smile_detector/__pycache__)'
 #delete sqlite database
 	@bash -c 'python scripts/cleanup-db.py'
 #delete venv
 	@bash -c 'rm -rf venv .mypy_cache'
 	@printf "%s\n%s\n%s\n" "----------------------------------------" "Done" "----------------------------------------"
 
-.PHONY: virtualenv install-requirements run-react run-gunicorn clean rebuild-all lint install-wheel install-react
+pytests:
+	@printf "%s\n%s\n%s\n" "----------------------------------------" "Running Python tests..." "----------------------------------------"
+	@bash -c '(source venv/bin/activate ; cd python/tests ; pytest -s)'
+	@printf "%s\n%s\n%s\n" "----------------------------------------" "Done" "----------------------------------------"
+
+
+.PHONY: virtualenv install-requirements run-react run-gunicorn clean rebuild-all lint install-wheel install-react pytests
