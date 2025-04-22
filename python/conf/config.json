@@ -22,7 +22,8 @@
         "network": {
             "hostname": "localhost",
             "port": 5050
-        }
+        },
+        "webcam_index": 0
     },
     "react": {
         "network": {
